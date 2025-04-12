@@ -1,7 +1,19 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
 #include <iostream>
+#include "Renderer/ShaderProgram.h"
+
+GLfloat point[] = {
+     0.0f,  0.5f,  0.0f,
+     0.5f, -0.5f,  0.0f,
+    -0.5f, -0.5f,  0.0f
+};
+
+GLfloat colors[] = {
+    1.0f, 0.0f, 0.0f,
+    0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f
+};
 
 int WinSizeX = 640;
 int WinSizeY = 480;
@@ -55,12 +67,41 @@ int main(void)
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 	
 	glClearColor(1,1,0,1);
+
+    Renderer::ShaderProgram shaderProg1("C:/Git_dirs/BattleCity/src/Shaders/someShader/shader1.vert", "C:/Git_dirs/BattleCity/src/Shaders/someShader/shader1.frag");
+    //Renderer::ShaderProgram shaderProg1("../../src/Shaders/someShader/shader1.vert", "../../src/Shaders/someShader/shader1.frag");
+
+    GLuint pointsVBO = 0;
+    glGenBuffers(1, &pointsVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, pointsVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(point), point, GL_STATIC_DRAW);
+
+    GLuint colorsVBO = 0;
+    glGenBuffers(1, &colorsVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, colorsVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+
+    GLuint vao = 0;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, pointsVBO);  
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, colorsVBO); 
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
 	
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(pWindow))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
+
+        shaderProg1.use();
+        glBindVertexArray(vao);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(pWindow);
